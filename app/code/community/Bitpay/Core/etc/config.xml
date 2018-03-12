@@ -36,7 +36,7 @@
 					</files>
 				</bitpay>
 			</modules>
-		</translate>
+		</translate>                
 	</frontend>
 	<admin>
 		<routers>
@@ -93,6 +93,15 @@
 					</auto_invoice_order>
 				</observers>
 			</sales_order_place_before>
+                        <checkout_onepage_controller_success_action>  
+                            <observers>
+                                <bitpay_checkout_onepage_success_observer>
+                                    <type>singleton</type>
+                                    <class>bitpay_core_model_observer</class>
+                                    <method>redirectToCartIfExpired</method>
+                                </bitpay_checkout_onepage_success_observer>
+                            </observers>
+                        </checkout_onepage_controller_success_action>
 		</events>
 		<resources>
 			<bitpay_write>
