@@ -114,6 +114,26 @@ class Bitpay_Core_IpnController extends Mage_Core_Controller_Front_Action
             \Mage::getModel('bitpay/method_bitcoin')>debugData('[ERROR] In Bitpay_Core_IpnController::indexAction(), IPN price and invoice price are different. Rejecting this IPN!');
             \Mage::throwException('There was an error processing the IPN - invoice price does not match the IPN price. Rejecting this IPN!');
         }
+        
+        $transactionSpeed = 'medium';
+        if ($ipn->status === 'paid' 
+            || ($ipn->status === 'confirmed' && $transactionSpeed === 'high')) {
+
+            if ($payments = $order->getPaymentsCollection())
+            {
+                $payment = count($payments->getItems())>0 ? end($payments->getItems()) : \Mage::getModel('sales/order_payment')->setOrder($order);
+            }
+
+            if (true === isset($payment) && false === empty($payment)) {                    
+                $payment->registerCaptureNotification($invoice->getPrice());                  
+                $order->setPayment($payment);   
+                $order->save();
+
+            } else {
+                \Mage::helper('bitpay')->debugData('[ERROR] In Bitpay_Core_IpnController::indexAction(), Could not create a payment object in the Bitpay IPN controller.');
+                \Mage::throwException('Could not create a payment object in the Bitpay IPN controller.');
+            }
+        }
 
         // use state as defined by Merchant
         $state = \Mage::getStoreConfig(sprintf('payment/bitpay/invoice_%s', $invoice->getStatus()));
