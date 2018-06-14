@@ -115,26 +115,6 @@ class Bitpay_Core_IpnController extends Mage_Core_Controller_Front_Action
             \Mage::throwException('There was an error processing the IPN - invoice price does not match the IPN price. Rejecting this IPN!');
         }
         
-        $transactionSpeed = 'medium';
-        if ($ipn->status === 'paid' 
-            || ($ipn->status === 'confirmed' && $transactionSpeed === 'high')) {
-
-            if ($payments = $order->getPaymentsCollection())
-            {
-                $payment = count($payments->getItems())>0 ? end($payments->getItems()) : \Mage::getModel('sales/order_payment')->setOrder($order);
-            }
-
-            if (true === isset($payment) && false === empty($payment)) {                    
-                $payment->registerCaptureNotification($invoice->getPrice());                  
-                $order->setPayment($payment);   
-                $order->save();
-
-            } else {
-                \Mage::helper('bitpay')->debugData('[ERROR] In Bitpay_Core_IpnController::indexAction(), Could not create a payment object in the Bitpay IPN controller.');
-                \Mage::throwException('Could not create a payment object in the Bitpay IPN controller.');
-            }
-        }
-
         // use state as defined by Merchant
         $state = \Mage::getStoreConfig(sprintf('payment/bitpay/invoice_%s', $invoice->getStatus()));
 
@@ -169,11 +149,29 @@ class Bitpay_Core_IpnController extends Mage_Core_Controller_Front_Action
             $order->setStatus("canceled");
             $order->save();
         }
+        
+        if ($ipn->status === 'paid') {
+        // Create a Magento invoice for the order when the 'paid' notification comes in
+            if ($payments = $order->getPaymentsCollection())
+            {
+                $payment = count($payments->getItems())>0 ? end($payments->getItems()) : \Mage::getModel('sales/order_payment')->setOrder($order);
+            }
 
-        $order_confirmation = \Mage::getStoreConfig('payment/bitpay/order_confirmation');
-        if($order_confirmation == '1')
-        {
-            $order->sendNewOrderEmail();
+            if (true === isset($payment) && false === empty($payment)) {                    
+                $payment->registerCaptureNotification($invoice->getPrice());                  
+                $order->setPayment($payment);
+                
+                $order_confirmation = \Mage::getStoreConfig('payment/bitpay/order_confirmation');
+                if($order_confirmation == '1' && !$order->getEmailSent()) {
+                    \Mage::helper('bitpay')->debugData('[INFO] In Bitpay_Core_IpnController::indexAction(), Order email not sent so I am calling $order->sendNewOrderEmail() now...');
+                    $order->sendNewOrderEmail();
+                }
+                $order->save();
+            }
+            else {
+                \Mage::helper('bitpay')->debugData('[ERROR] In Bitpay_Core_IpnController::indexAction(), Could not create a payment object in the Bitpay IPN controller.');
+                \Mage::throwException('Could not create a payment object in the Bitpay IPN controller.');
+            }
         }
 
     }
