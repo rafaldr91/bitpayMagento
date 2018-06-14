@@ -151,20 +151,30 @@ class Bitpay_Core_IpnController extends Mage_Core_Controller_Front_Action
         }
         
         if ($ipn->status === 'paid') {
+            \Mage::helper('bitpay')->debugData('[INFO] Receiving paid IPN, creating invoice for order.');
         // Create a Magento invoice for the order when the 'paid' notification comes in
             if ($payments = $order->getPaymentsCollection())
             {
                 $payment = count($payments->getItems())>0 ? end($payments->getItems()) : \Mage::getModel('sales/order_payment')->setOrder($order);
             }
 
-            if (true === isset($payment) && false === empty($payment)) {                    
-                $payment->registerCaptureNotification($invoice->getPrice());                  
+            if (true === isset($payment) && false === empty($payment)) {
+                $payment->registerCaptureNotification($invoice->getPrice());
                 $order->setPayment($payment);
                 
                 $order_confirmation = \Mage::getStoreConfig('payment/bitpay/order_confirmation');
-                if($order_confirmation == '1' && !$order->getEmailSent()) {
-                    \Mage::helper('bitpay')->debugData('[INFO] In Bitpay_Core_IpnController::indexAction(), Order email not sent so I am calling $order->sendNewOrderEmail() now...');
-                    $order->sendNewOrderEmail();
+                if($order_confirmation == '1') {
+                    if (!$order->getEmailSent()) {
+                        \Mage::helper('bitpay')->debugData('[INFO] In Bitpay_Core_IpnController::indexAction(), Order email not sent so I am calling $order->sendNewOrderEmail() now...');
+                        $order->sendNewOrderEmail();
+                    }
+                    else
+                    {
+                        \Mage::helper('bitpay')->debugData('[INFO] Plugin configured to send order confirmation, but order confirmation already sent.');
+                    }
+                }
+                else {
+                    \Mage::helper('bitpay')->debugData('[INFO] Plugin configured to not send order confirmation.');
                 }
                 $order->save();
             }
