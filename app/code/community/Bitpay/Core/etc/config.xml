@@ -8,7 +8,7 @@
 <config>
 	<modules>
 		<Bitpay_Core>
-			<version>2.1.19</version>
+			<version>2.1.20</version>
 		</Bitpay_Core>
 	</modules>
 	<frontend>
@@ -135,6 +135,7 @@
 				<title>Bitcoin and Bitcoin Cash</title>
                 <api_key>test</api_key>
 				<network>livenet</network>
+				<order_confirmation>1</order_confirmation>
 				<debug>0</debug>
 				<notification_url>bitpay/ipn</notification_url>
 				<redirect_url>checkout/onepage/success</redirect_url>
@@ -144,9 +145,9 @@
 				<invoice_new>new</invoice_new>
 				<invoice_paid>pending</invoice_paid>
 				<invoice_confirmed>processing</invoice_confirmed>
-				<invoice_complete>complete</invoice_complete>
+				<invoice_complete>processing</invoice_complete>
 				<invoice_expired>canceled</invoice_expired>
-				<invoice_invalid>canceled</invoice_invalid>
+				<invoice_invalid>pending</invoice_invalid>
 			</bitpay>
 		</payment>
 	</default>
