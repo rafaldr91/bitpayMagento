@@ -105,7 +105,7 @@ class Bitpay_Core_IpnController extends Mage_Core_Controller_Front_Action
             $quoteData = Mage::getModel('sales/quote')->setStoreId(Mage::app()->getStore('default')->getId())->load($quoteID_magento);
             $quoteData->setIsActive(0)->save();
         }
-        
+
         if (false === isset($invoice) || true === empty($invoice)) {
             \Mage::helper('bitpay')->debugData('[ERROR] In Bitpay_Core_IpnController::indexAction(), Could not retrieve the invoice details for the ipn ID of ' . $ipn->id);
             \Mage::throwException('Could not retrieve the invoice details for the ipn ID of ' . $ipn->id);
