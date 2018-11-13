@@ -28,7 +28,7 @@ class Bitpay_Core_Model_Invoice extends Mage_Core_Model_Abstract
             \Mage::helper('bitpay')->debugData('[ERROR] In Bitpay_Core_Model_Invoice::prepareWithBitpayInvoice(): Missing or empty $invoice parameter.');
             throw new \Exception('In Bitpay_Core_Model_Invoice::prepareWithBitpayInvoice(): Missing or empty $invoice parameter.');
         }
-        
+         
         $this->addData(
             array(
                 'id'               => $invoice->getId(),
@@ -38,9 +38,9 @@ class Bitpay_Core_Model_Invoice extends Mage_Core_Model_Abstract
                 'price'            => $invoice->getPrice(),
                 'currency'         => $invoice->getCurrency()->getCode(),
                 'order_id'         => $invoice->getOrderId(),
-                'invoice_time'     => intval(date_format($invoice->getInvoiceTime(), 'U') / 1000),
-                'expiration_time'  => intval(date_format($invoice->getExpirationTime(), 'U') / 1000),
-                'current_time'     => intval(date_format($invoice->getCurrentTime(), 'U') / 1000),
+                'invoice_time'     => intval(date_format($invoice->getInvoiceTime(), 'U')),
+                'expiration_time'  => intval(date_format($invoice->getExpirationTime(), 'U')),
+                'current_time'     => intval(date_format($invoice->getCurrentTime(), 'U')),
                 'exception_status' => $invoice->getExceptionStatus(),
                 'transactionCurrency' => $invoice->getTransactionCurrency()
             )
